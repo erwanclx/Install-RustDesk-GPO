@@ -42,5 +42,9 @@ Rename-Item -Path .\rustdesk-$ver-putes.exe -NewName "rustdesk-host=$IpAddress,k
 # Run the installer silently
 $Process = Start-Process -FilePath ".\rustdesk-host=$IpAddress,key=$PublicKeyString.exe" -ArgumentList "--silent-install" -PassThru -Verb runAs -Wait
 
+# Erase the installer and the zip file
+Remove-Item -Path $TempFolder\rustdesk -Recurse -Force
+Remove-Item -Path $TempFolder\rustdesk.zip -Recurse -Force
+
 # Exit with what ever exit code the installer returns
 exit $Process.ExitCode
