@@ -8,13 +8,13 @@ A simple script which allows to install RustDesk Client with custom IP Address a
 
 - Replace the IP with your RustDesk server at the line 5 :
 
-```powershell```
+```powershell
 $IpAddress = "127.0.0.1"
-
 ```
+
 - Replace the PublicKeyString by the key on your RustDesk Server at the line 7 :
 
-```powershell```
+```powershell
 $PublicKeyString = "12345678"
 ```
 
