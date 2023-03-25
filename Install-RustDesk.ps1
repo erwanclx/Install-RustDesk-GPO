@@ -1,5 +1,3 @@
-$ErrorActionPreference = 'SilentlyContinue'
-
 #Region Settings
 # IP address of our server
 $IpAddress = "127.0.0.1"
@@ -9,16 +7,11 @@ $PublicKeyString = "12345678"
 $TempFolder = "C:\Temp\"
 #EndRegion Settings
 
-# Check if we are running in admin context
-function Test-IsElevated {
-    $id = [System.Security.Principal.WindowsIdentity]::GetCurrent()
-    $p = New-Object System.Security.Principal.WindowsPrincipal($id)
-    $p.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
-}
-if (-not (Test-IsElevated)) {
-    Write-Error -Message "Access Denied. Please run with Administrator privileges."
-    exit 1
-}
+
+#Check latest version of rustdesk
+$response = Invoke-WebRequest -Uri "https://api.github.com/repos/rustdesk/rustdesk/releases/latest" -UseBasicParsing
+$json = $response.Content | ConvertFrom-Json
+$ver = $json.tag_name 
 
 # Check if RustDesk is already installed and exit if it is installed
 if ((Test-Path -Path "C:\Program Files\RustDesk\RustDesk.exe")) {
@@ -34,8 +27,8 @@ if (!(Test-Path -Path $TempFolder)) {
 # Change the current location to the temp folder
 Set-Location $TempFolder
 
-# Download version 1.1.9 of rustdesk
-Invoke-WebRequest -Uri "https://github.com/rustdesk/rustdesk/releases/download/1.1.9/rustdesk-1.1.9-windows_x64.zip" -Outfile rustdesk.zip
+# Download last version of rustdesk
+Invoke-WebRequest -Uri "https://github.com/rustdesk/rustdesk/releases/download/$ver/rustdesk-$ver-windows_x64.zip" -Outfile rustdesk.zip
 
 # Extract the installer
 Expand-Archive rustdesk.zip
@@ -44,10 +37,10 @@ Expand-Archive rustdesk.zip
 Set-Location rustdesk
 
 # Rename the installer to configure the installer
-Rename-Item -Path .\rustdesk-1.1.9-putes.exe -NewName "rustdesk-host=$IpAddress,key=$PublicKeyString.exe"
+Rename-Item -Path .\rustdesk-$ver-putes.exe -NewName "rustdesk-host=$IpAddress,key=$PublicKeyString.exe"
 
 # Run the installer silently
-$Process = Start-Process -FilePath ".\rustdesk-host=$IpAddress,key=$PublicKeyString.exe" -ArgumentList "--silent-install" -PassThru
+$Process = Start-Process -FilePath ".\rustdesk-host=$IpAddress,key=$PublicKeyString.exe" -ArgumentList "--silent-install" -PassThru -Verb runAs -Wait
 
 # Exit with what ever exit code the installer returns
 exit $Process.ExitCode
